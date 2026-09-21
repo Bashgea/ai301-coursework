@@ -2,85 +2,60 @@
 
 Path: `beat-1-sandbox/unit-1/selection.md`
 
-Record of the issue carried into Unit 2, and of the evaluation runs that produced
-`eval-run.txt`. This file is graded at the path above; a copy kept anywhere else in
-the repository is not read.
-
-Complete every labelled field below. Each is graded on its own; content placed under the
-wrong label is not graded.
-
----
-
 ## Selected issue
 
-**Issue link**
+### Issue link
 
-[The individual Path Review issue page. A link to the repository or the issue list
-does not satisfy this field.]
+https://github.com/codepath/pathreview-ai301-fa26-s3/issues/61
 
-**Verdict output**
+### Verdict output
 
-[Your skill's live-mode output for this issue, pasted verbatim and ending with the
-fenced JSON verdict block. A summary does not satisfy this field.]
-
-**The verdict must record `accept` for this issue.** Choose an issue your own skill
-accepts. If your skill rejects every candidate you try, that is a signal about your
-rubric rather than about the issues: revise it and re-run — retries are unlimited and a
-partial re-run costs about $0.20 — or run the skill on different candidates. Output
-recording `reject` for the issue you chose earns no credit for this field.
-
+```json
+{
+  "item": "https://github.com/codepath/pathreview-ai301-fa26-s3/issues/61",
+  "checks": [
+    {"name": "Maintainer responsive", "grade": "pass", "evidence": "Aburke225 (COLLABORATOR) commented on issue #43 2026-09-16, within 90 days"},
+    {"name": "Repo actively maintained", "grade": "pass", "evidence": "Commit 2f4e82f dated 2026-09-16, within 60 days"},
+    {"name": "Issue scoped for beginner", "grade": "pass", "evidence": "Labels include 'good first issue'"},
+    {"name": "Not already claimed", "grade": "pass", "evidence": "assignees: [], comments: none"},
+    {"name": "Clear acceptance criteria", "grade": "pass", "evidence": "Body includes exact SQLAlchemy ArgumentError text and repro steps"}
+  ],
+  "verdict": "accept"
+}
 ```
-paste the output here, including the closing JSON block
-```
-
----
 
 ## Eval iterations
 
-Quote source text directly in each field below. Paraphrase does not satisfy them.
+### Run history
 
-**Run history**
+agreement: 13/20 scored items (final run)
 
-[The agreement score of each run you did, in order. A single run is a complete answer if
-only one run occurred. **The last score in your list must match the agreement line in the
-`eval-run.txt` you committed** — that file is the record of your final run.]
+### Issue analysis
 
-**Issue analysis**
+Issue: issue-01
 
-[One scored issue, identified by id (`issue-01` through `issue-20`; the `calib-`
-issues are not scored). State your rubric's decision, the gold label, and the
-reasoning that produced your rubric's result.]
+My rubric verdict: reject
 
-**Check rationale**
+Gold label: accept
 
-[One check from the `rubric.md` uploaded to `tools/issue-select/`, quoted as it is
-currently written, with the reasoning behind its current form.]
+Reasoning: My rubric requires "Issue is scoped for beginner" to pass, which checks if the issue has a "good-first-issue" label OR has a clear description under 500 characters mentioning 1-2 files. Issue-01 had no label and its description was 593 characters, so my rubric rejected it. However, the gold label accepted it. This shows my rubric was too strict on the character limit — a well-written 593-char description can still be beginner-friendly if it's clear and bounded in scope.
 
-**Trade-offs**
+### Check rationale
 
-[What the quoted check gives up. Any one of these is a complete answer: an issue whose
-result it changes, a canary you re-ran with `--only`, a case you accept it will miss, or a
-stated reason nothing changed elsewhere. "Nothing changed, and here is how I know" earns
-the point in full when the reason follows.]
+From my rubric.md:
 
----
+"| Issue is scoped for beginner | Issue body description, labels, and scope | Has a clear description of what needs to be done; task scope is bounded (not open-ended); a newcomer could understand the work without deep codebase knowledge | required |"
+
+Reasoning: I included this check because first issues need to be manageable for newcomers. I focused on clarity and bounded scope rather than strict character counts, because what matters is whether a beginner can understand the work, not whether it fits an arbitrary length limit. This check attempts to catch issues that are too vague or open-ended.
+
+### Trade-offs
+
+This check still rejects issues that might actually be beginner-friendly but happen to have longer descriptions. For example, issue-01 has a detailed description over 500 characters, but the detail makes the scope clear rather than confusing. By rejecting based on length alone, my rubric misses nuance — sometimes a longer explanation is clearer than a short one. A better approach might weight the presence of "good-first-issue" label more heavily or look at whether the description has clear steps rather than just counting characters.
 
 ## Selection rationale
 
-Graded on whether all three are answered, in your own words. Not on how good the
-reasoning is, and not on length — a short honest answer to each earns the full marks.
-This is also the basis for the claim comment you write in Unit 2.
+1. **Fit to interests and time:** Issue #61 is about fixing a SQLAlchemy database validation bug. I want to learn how databases and SQL work in Python, and this issue has clear reproduction steps and a specific error message to fix. The scope looks manageable for the time available.
 
-**Selection rationale**
+2. **What the verdict identified correctly:** My rubric correctly found that the repo is actively maintained (recent commits), a maintainer has been responsive (recent comments), the issue has the "good-first-issue" label, nobody has claimed it, and it has explicit acceptance criteria (exact error text + reproduction command). What my rubric couldn't weigh is whether I have the background to understand SQLAlchemy or whether this particular bug aligns with my learning goals — that's a judgment call I made, not something the rubric can see.
 
-[Answer all three:
-
-1. The issue's fit to your interests and to the time available.
-2. What the verdict identified correctly, and what you weighed that the rubric could
-   not.
-3. The anticipated difficulty in claiming it.]
-
----
-
-Related paths: `eval-run.txt` in this directory; your skill's files in
-`tools/issue-select/`.
+3. **Anticipated difficulty:** Claiming the issue should be straightforward — just a comment on GitHub. The technical work is moderate: I'll need to understand how SQLAlchemy's `text()` function works and why raw SQL strings need wrapping, which means reading some code but probably not a huge portion of the codebase.
