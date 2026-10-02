@@ -2,70 +2,89 @@
 
 Path: `beat-1-sandbox/unit-2/reproduction.md`
 
-Record of your claim and reproduction on the issue you chose in Unit 1, and of the
-evaluation runs that produced `eval-run.txt`. This file is graded at the path above; a copy
-kept anywhere else in the repository is not read.
-
-Complete every labelled field below. Each is graded on its own; content placed under the wrong
-label is not graded.
-
----
-
 ## Your identity upstream
 
-**GitHub username**
+### GitHub username
 
-[Your GitHub username, exactly as it appears on your profile — no `@`, no profile URL. Your
-comments upstream are identified by this name.]
-
----
+Bashgea
 
 ## Posted upstream
 
-**Claim comment**
+### Claim comment
 
-[Link to the comment where you claimed the issue. Use the comment's own permalink, not the
-issue page on its own. **Then paste the text of that comment underneath the link** — the
-pasted text is what this field is graded on, so copy across what you actually posted.]
+https://github.com/codepath/pathreview-ai301-fa26-s3/issues/61#issuecomment-5944506304
 
-**Reproduction comment**
+Hi, I'd like to take this issue as a first contribution. I haven't reproduced it yet. My plan is to set up the stack, call GET /health, and check whether the database probe in api/routes/health.py raises the SQLAlchemy 2.x ArgumentError about the raw "SELECT 1" string. I'll post a repro report here with my environment, steps, and what I observe, including if I can't reproduce it.
 
-[Link to the comment where you posted your reproduction. It must record the environment
-(OS, relevant versions, code state), steps a stranger could follow, and what you observed.
-**Then paste the text of that comment underneath the link** — the pasted text is what this
-field is graded on, so copy across what you actually posted.]
+### Reproduction comment
+
+https://github.com/codepath/pathreview-ai301-fa26-s3/issues/61#issuecomment-5945504151
+
+GET /health reports postgres as unhealthy even though the database is reachable. I reproduced it.
+
+Environment
+- Windows: Microsoft Windows [Version 10.0.26200.9457]
+- Repo: my fork of codepath/pathreview-ai301-fa26-s3, main at commit 2f4e82f
+- Python 3.13.14 (the project .venv was built from it), SQLAlchemy 2.1.1
+- Docker 29.1.2, Compose v2.40.3-desktop.1, GNU Make 3.81, Git 2.52.0.windows.1
+- Commands run in Git Bash, except copying .env, which I did in PowerShell
+
+Steps (from the repo root)
+1. Copy-Item .env.example .env   (in Git Bash: cp .env.example .env)
+2. docker compose up -d
+   Here the redis container could not publish port 6379 (another container on my machine held it) and vector-db exited. The db container started.
+3. make setup failed at the alembic step with "password authentication failed for user pathreview". A native postgres.exe on my machine was also listening on port 5433, so my login never reached the project's database. Workaround: I created an untracked docker-compose.override.yml with
+     services:
+       db:
+         ports: !override
+           - "5434:5432"
+   ran `docker compose up -d db`, and changed DATABASE_URL in .env to localhost:5434.
+4. make setup again. Migrations 001 and 002 ran and the seed completed.
+5. Terminal 1: .venv/Scripts/python -m uvicorn api.main:app --host 127.0.0.1 --port 8000
+6. Terminal 2: curl -i http://127.0.0.1:8000/health
+
+Observed
+HTTP/1.1 503 Service Unavailable, body:
+{"detail":{"status":"unhealthy","dependencies":{"postgres":"unhealthy","redis":"unhealthy","vector_db":"healthy"},"safety_events_last_hour":0,"timestamp":"2026-10-02T03:38:17.784569"}}
+
+Server log for that request:
+[error] postgres_health_check_failed error="Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')"
+[error] redis_health_check_failed error="'Settings' object has no attribute 'redis_host'"
+The server's startup queries on the same database had succeeded a few seconds earlier (application_startup_completed).
+
+Supporting check, a standalone script using an AsyncSession on settings.database_url (not the route itself):
+raw string -> sqlalchemy.exc.ArgumentError : Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')
+text() -> 1
+
+Result
+The postgres error in the log matches the one in the issue. I only sent one request, so I don't know how often it happens. The response also showed redis unhealthy, but that's a different error (the redis_host one in #62), not this issue. I haven't tried a fix.
 
 ## Eval iterations
 
-Answer all four sections. Quote source text directly; paraphrase does not satisfy these
-fields.
+### Run history
 
-**Run history**
+1. Smoke run, `--limit 3`: 3/3 (checked that the harness launched; not scored against the bar).
+2. Run 1, full, 20 packages: 17/20. Misses: pkg-05, pkg-09, pkg-10.
+3. Run 2, partial, 9 packages: 8/9. pkg-05, pkg-09 and pkg-10 flipped to agree, but pkg-20 flipped to a wrong accept.
+4. Run 3, partial, 6 packages: 6/6, after I rewrote the conventions check.
+5. Run 4, full, 20 packages, saved with `--save-run eval-run.txt`: 20/20.
 
-[The agreement score of each run you did, in order. A single run is a complete answer if
-only one run occurred. **The last score in your list must match the agreement line in the
-`eval-run.txt` you committed** — that file is the record of your final run.]
+My first full-run attempt crashed on a Windows encoding error before it graded anything, so it has no score. The last score above, 20/20, is the agreement line in the committed `eval-run.txt`.
 
-**Package analysis**
+### Package analysis
 
-[Pick one scored package (`pkg-01` through `pkg-20` — the four `calib-` packages are never
-scored). Name it by id, say what your rubric decided and what the gold label said, and
-explain why your rubric read it that way.]
+pkg-10 (starship#7648). Gold label: accept. In Run 1 my rubric said reject, and the note column read "failed: behavior-matches-issue". The grader's evidence for that check was: "Prompt shows `monorepo/packages/app-dir on  master` and `starship explain` lists the directory module — the opposite of the issue's blank/omitted module".
 
-**Check rationale**
+My rubric read it that way because my first behavior-matches-issue condition said "The shown artifact exhibits the same error or symptom the issue reports." pkg-10 is an honest cannot-reproduce. It runs the issue's exact symlink layout and config, and it shows the module rendering fine, so its artifact cannot show the symptom. My outcome-honest row already said an evidenced cannot-reproduce passes, so the two rows contradicted each other. The gold label was right. I changed the behavior check to ask whether the artifact is aimed at the issue's own trigger and shows what happened, and pkg-10 agreed (accept) in Run 3 and Run 4.
 
-[Quote one check from the `rubric.md` you uploaded to `tools/repro-check/`, exactly as it reads now.
-Then say why it reads that way — what you revised to get there, or what you rejected in
-favour of it.]
+### Check rationale
 
-**Trade-offs**
+| behavior-matches-issue | The commands and output excerpt in the repro report, read against the behavior and trigger the issue describes | The artifact is aimed at the issue's own behavior. Either it shows the symptom the issue reports, or, in a cannot-reproduce, it shows an attempt at the issue's described trigger and what was observed instead. It fails if it shows a different or adjacent behavior or error than the issue's, exercises a different scenario than the one the issue describes, or shows no artifact at all. | required |
 
-[Every check gives something up. Any one of these is a complete answer: a package whose
-result it changes, a canary you re-ran with `--only`, a case you accept it will miss, or a
-stated reason nothing changed elsewhere. "Nothing changed, and here is how I know" earns
-the point in full when the reason follows.]
+It reads this way because of Run 1. My first version required the artifact to show the issue's symptom, which rejected pkg-09 and pkg-10, two honest cannot-reproduce reports that gold labelled accept. I rewrote it so an attempt at the issue's trigger counts, and I kept three failure cases: a different or adjacent error, a different scenario, and no artifact. Dropping the symptom requirement entirely would have let wrong-target packages through, and the wrong-target packages (pkg-02, pkg-14, pkg-17) stayed reject.
 
----
+### Trade-offs
 
-Related paths: `eval-run.txt` in this directory; your skill's files in
-`tools/repro-check/`.
+Loosening behavior-matches-issue and conventions-respected together flipped pkg-20, the one disclosure package, from reject to accept in Run 2. The grader's reason was "no evidence of AI use present to require disclosure," so it read the repo's rule as something that only applies when AI use is visible. I rewrote the disclosure part of conventions-respected to say that absence of a statement is the failure. I re-ran the fix with `--only pkg-20,pkg-07,pkg-09,pkg-05,pkg-16,pkg-19` (6/6). pkg-07 (it discloses AI use) and pkg-09 (its policy covers pull requests only) are the canaries that had to stay accept, and pkg-16 and pkg-19 guard the template-ask logic. The trade-off I accept is that conventions-respected is strict: a package that follows the repo's policy but omits a required reproduction link or config is held, so a good report can be rejected for a missing link.
+
+Related paths: `eval-run.txt` in this directory; skill files in `tools/repro-check/`.
