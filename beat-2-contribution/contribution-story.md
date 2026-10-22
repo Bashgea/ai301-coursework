@@ -9,8 +9,7 @@ files and no evidence uploads are part of Assignment 5.
 
 **Contribution Number:** [1]
 **Student:** [Student name]
-**GitHub Username:** [your GitHub username, exactly as it appears on your profile - no @, no
-profile URL. Your comments upstream are identified by this name.]
+**GitHub Username:** Bashgea
 **Issue:** [GitHub issue link]
 **Pull Request:** [GitHub PR link, once opened]
 
@@ -55,10 +54,9 @@ happened; these entries are the toolkit's own timeline.
 All four entries are graded. Keep every heading below, and fill each
 one in the week it belongs to.
 
-**Unit 5: [one line on the tool work]**
+**Unit 5: Upgraded issue-select into issue-scout, which searches GitHub and grades what it finds**
 
-[2-4 sentences: what you built (the scout, your strategy), what broke
-or fell short, what changed because of it.]
+I upgraded my unit 1 skill into issue-scout by writing eight gh search queries, each traced to a sentence of my fit profile, plus ranking filters on assignees, recency, and comment count. My first scan only graded brand-new zero-comment issues, so just the "agent" queries reached the top five; I capped results at two per query, and the second scan added an auth candidate. Then six picks from the Issue Selection site were all rejected, four because of an existing claim or open PR, which search results don't show, so the ranking can't catch it. The rubric caught each one from evidence, so I left it unchanged, and I now check comments and linked PRs by hand before paying to grade.
 
 **Unit 6: [one line on the tool work]**
 
