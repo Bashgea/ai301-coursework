@@ -8,7 +8,7 @@ format criteria grade exactly that. Your course repo link is the whole submissio
 files and no evidence uploads are part of Assignment 5.
 
 **Contribution Number:** [1]
-**Student:** [Student name]
+**Student:** [Armand Bashige]
 **GitHub Username:** Bashgea
 **Issue:** [GitHub issue link]
 **Pull Request:** [GitHub PR link, once opened]
